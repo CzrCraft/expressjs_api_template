@@ -1,0 +1,10 @@
+{
+    "serverSettings": {
+        "port": 42069,
+        "auth": {
+            "accessToken": "somethingHere"
+        }
+    },
+    "customSettings": {
+    }
+}
