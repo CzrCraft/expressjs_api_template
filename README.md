@@ -26,4 +26,42 @@
 *    -all of the proccesses functionallity is inside procHandler.js so use that to delete proccesses etc..
 *    -that's about it have fun
 
-* *also i'm gonna add logging to discord soon*     
+* *also i'm gonna add logging to discord soon*
+
+# HOW THE LOGGING WORKS
+* basically you need to use logger.announce for regular stuff like printing
+* it will show up in console & log files
+* you can pass it the req parameter so that it also logs the ip of the guy who sent the request :)
+
+* for errors use logger.announceError
+* you can pass it the req parameter so that it also logs the ip of the guy who caused the error
+
+# EXAMPLE WORKING ROUTE
+````
+   const logger = require("../logger")
+   const procHandler = require("../procHandler")
+   const template = require("./template")
+   module.exports = { 
+    ur_route_name-it_dont_matter: class extends template.Route{
+        constructor() {
+            // actuall route like for example github.com/CzrCraft where /CzrCraft is the route
+            const route = "/exampleRoute"
+            super(route);
+            // can be accessed using urdomain.com/exampleRoute
+            // where ur domain can be ur ip etc...
+        }
+        // any HTTP method can be declared here with the following syntax
+        async GET(req, res) {
+            try {
+                // if the operation the request is doing doesn't need loading or lookup at a later time you should delete the proccess
+                logger.announnce("hello am doing someting")
+                // like this
+                procHandler.deleteProc(req.procID);
+            } catch (err) {
+                logger.announceError(err)
+                res.sendStatus(400)
+            }
+        }
+    },
+   }
+````
