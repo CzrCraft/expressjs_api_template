@@ -19,7 +19,7 @@
 *   also name don't matter
 *   multiple clasess can have the same name just make sure that they have different routes
  
-* stuff 2 know:
+# stuff 2 know:
 *    -you can access the configs object by using req.configs
 *    -you can place files inside folders and it will still work
 *    -also each request will like generate a new proccess wich you can access using req.procID
