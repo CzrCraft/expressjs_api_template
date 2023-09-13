@@ -33,7 +33,7 @@ const logger = winston.createLogger({
     timestamp: true,
     transports: [
         new winston.transports.Console(),
-        new winston.transports.File({ filename: 'logs/' + date_ob.getFullYear() + "/" + "Luna " + (date_ob.getMonth() + 1) + "/" + "Ziua " + date_ob.getDate() + "/" + 'error.log', level: 'error' }),
-        new winston.transports.File({ filename: 'logs/' + date_ob.getFullYear() + "/" + "Luna " + (date_ob.getMonth() + 1) + "/" + "Ziua " + date_ob.getDate() + "/" + 'combined.log' }),
+        new winston.transports.File({ filename: 'logs/' + date_ob.getFullYear() + "/" + "Month-" + (date_ob.getMonth() + 1) + "/" + "Day-" + date_ob.getDate() + "/" + 'error.log', level: 'error' }),
+        new winston.transports.File({ filename: 'logs/' + date_ob.getFullYear() + "/" + "Month-" + (date_ob.getMonth() + 1) + "/" + "Day-" + date_ob.getDate() + "/" + 'combined.log' }),
     ],
 });
