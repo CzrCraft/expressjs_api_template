@@ -1,10 +1,13 @@
 const winston = require("winston");
+const discord = require("./discord")
 module.exports = {
     announce: async function (message, req) {
         if (req != null) {
             logger.info("-" + req.ip + "- " + message);
+            discord.sendInfo("-" + req.ip + "- " + message)
         } else {
             logger.info(message);
+            discord.sendInfo(message)
         }
     },
     announceError: async function (message, req) {

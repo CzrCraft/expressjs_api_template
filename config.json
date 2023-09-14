@@ -3,6 +3,12 @@
         "port": 42069,
         "auth": {
             "accessToken": "somethingHere"
+        },
+        "logger": {
+            "botName": "API-LOGS",
+            "botIcon": "https://cdn-icons-png.flaticon.com/512/2620/2620995.png",
+            "infoAndErrorWebhook": "https://discord.com/api/webhooks/1151775112060751953/_TTV2lHbV4ANAvDdfh1zO4rC5cny8-ca-nR-S2GQppGLKR3M1f84FkQ7wtsQn7Abwpry",
+            "errorOnlyWebhook": "https://discord.com/api/webhooks/1151778454770032691/yRlmybAqG0IYkGbawTIbsLMYIiXIRv3Cchz7BnJhz-iMGGP0ona4y2OAaCbVCAKsafYy"
         }
     },
     "customSettings": {

@@ -1,4 +1,3 @@
-// TODO: ADD ERROR CHECKING LIBRARY THAT AUTOMATICALLY CHECKS ANY FUNCTION SPECIFIED FOR ERRORS
 
 const express = require("express");
 const app = express();
