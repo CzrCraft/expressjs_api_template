@@ -17,15 +17,26 @@ module.exports = async function (req, res, next) {
     try {
         if (securityToken != "") {
             if (req.headers["token"] == securityToken) {
-                logger.announce("Accessed the API : " + req.originalUrl.split('?')[0], req)
+                logger.announce("Accessed the API : " + req.originalUrl, req)
                 req.configs = configsJSON
                 const procID = await procHandler.createProc();
                 req.procID = procID;
                 next();
             } else {
-                res.status = 400;
-                res.send("INVALID AUTH TOKEN!")
-                logger.announceError("Failed to access the API", req)
+                if (req.originalUrl != "/favicon.ico") {
+                    let gonnaKms = mainFile.getRouteDetails(req.originalUrl)
+                    if (gonnaKms["IGNORE_TOKEN"] != undefined) {
+                        logger.announce("Accessed the API !WITH NO TOKEN! : " + req.originalUrl, req)
+                        req.configs = configsJSON
+                        const procID = await procHandler.createProc();
+                        req.procID = procID;
+                        next();
+                    } else {
+                        res.status = 400;
+                        res.send("INVALID AUTH TOKEN!")
+                        logger.announceError("Failed to access the API", req)
+                    }
+                }
             }
         } else {
             res.sendStatus(500);

@@ -20,8 +20,11 @@ module.exports = {
             const callerLine = stackLines[2].trim();
             logger.error("-" + req.ip + "- " + message);
             logger.error(callerLine)
+            discord.sendError("-" + req.ip + "- " + message)
+            discord.sendError(callerLine)
         } else {
             logger.error(message);
+            discord.sendError(message)
         }
     },
 }

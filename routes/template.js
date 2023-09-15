@@ -9,11 +9,11 @@ module.exports = {
         // value isn't "undefined"
     },
     Route: class {
-        constructor(route) {
-            this.route = route;
-        }
-        get path(){
-            return this.route;
+        constructor(route, additionalParams, IGNORE_TOKEN, OWN_ALL_CHILD_ROUTES) {
+            this.path = route;
+            this.params = additionalParams
+            this.IGNORE_TOKEN = IGNORE_TOKEN
+            this.OWN_ALL_CHILD_ROUTES = OWN_ALL_CHILD_ROUTES
         }
         async GET(req, res) { res.sendStatus(400) }
         async POST(req, res) { res.sendStatus(400) }
