@@ -20,7 +20,7 @@ function getRandomInt(max) {
 module.exports = {
     // i use this proccess aproach to be able to have loading statuses and more, along with easier tracking and logging of functions
     // basically i allow the app to show a loading screen
-    createProc: async function () {
+    createProc: async function (dont_log) {
         // create a random procID and make sure that it isn't already present in procArray
         const procID = getRandomInt(10000000000)
         while (procID in procArray) {
@@ -30,7 +30,9 @@ module.exports = {
             "status": "init",
             "info": ""
         };
-        logger.announce("Created a new proccess with Proccess ID: " + procID)
+        if (dont_log == undefined) {
+            logger.announce("Created a new proccess with Proccess ID: " + procID)
+        }
         return procID;
     },
     updateProcStatus: async function (procID, newStatus, newInfo = "") {
@@ -54,10 +56,12 @@ module.exports = {
             throw "Incorrect parameters passed to getProcInfo";
         }
     },
-    deleteProc: async function (procID) {
+    deleteProc: async function (procID, dont_log) {
         if (procID != undefined && procID != "") {
             delete procArray[procID];
-            logger.announce("Deleted a proccess with Proccess ID: " + procID)
+            if (dont_log == undefined) {
+                logger.announce("Deleted a proccess with Proccess ID: " + procID)
+            }
         } else {
             logger.announceError("Incorrect parameters passed to deleteProc")
             throw "Incorrect parameters passed to deleteProc";

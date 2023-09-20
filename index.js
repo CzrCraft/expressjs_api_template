@@ -5,11 +5,11 @@ const fs = require("fs")
 const logger = require("./logger")
 const customMiddleware = require("./middleware")
 const routeTemplate = require("./routes/template")
-
+const cookieParser = require("cookie-parser")
 let extraRouteDetails = {}
-app.use(customMiddleware)
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }))
-
+app.use(customMiddleware)
 function isClass(variable) {
     return typeof variable === 'function' && variable.prototype && variable.prototype.constructor === variable;
 }
@@ -58,6 +58,9 @@ async function checkDirAndImport(path) {
                             result.push(valueInstance);
                             extraDetails["content"]["IGNORE_TOKEN"] = valueInstance["IGNORE_TOKEN"]
                             extraDetails["content"]["OWN_ALL_CHILD_ROUTES"] = valueInstance["OWN_ALL_CHILD_ROUTES"]
+                            extraDetails["content"]["DONT_LOG_ACCESS"] = valueInstance["DONT_LOG_ACCESS"]
+                            extraDetails["content"]["CHECK_COOKIE"] = valueInstance["CHECK_COOKIE"]
+                            extraDetails["content"]["COOKIE_FAILURE_CALLBACK"] = valueInstance["COOKIE_FAILURE_CALLBACK"]
                             extraRouteDetails[extraDetails.route] = extraDetails["content"]
                         }
                     }
@@ -100,7 +103,7 @@ fs.readFile("./config.json", "utf8", (err, jsonString) => {
 
 function getValueByPartialKey(objectToSearch, partialKey, needFullKey) {
     for (const keye in objectToSearch) {
-        if (partialKey.includes(keye)) {
+        if (partialKey.includes(keye) || (partialKey + "/").includes(keye)) {
             if (!objectToSearch[keye]["OWN_ALL_CHILD_ROUTES"]) {
                 if (partialKey == keye) {
                     return objectToSearch[keye];

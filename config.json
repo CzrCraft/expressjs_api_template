@@ -2,7 +2,9 @@
     "serverSettings": {
         "port": 42069,
         "auth": {
-            "accessToken": "somethingHere"
+            "accessToken": "somethingHere",
+            "managerUser": "testUser",
+            "managerPassword": "testPassword"
         },
         "logger": {
             "logToDiscord": false,

@@ -1,26 +1,128 @@
 <!DOCTYPE html>
-<html lang="en">
+    <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>API_MANAGER</title>
+            <style>
+                .debug { color: Snow; }
+                .info  { color: LawnGreen; }
+                .warn  { color: GoldenRod; }
+                .error { color: LightCoral; }
+            </style>
+        </head>
+        <body style="background-color: black">
+            <script>
+                function scrollToBottom() {
+                    var height = document.body.scrollHeight;
+                    window.scroll(0, height);
+                }
+                var console = (function () {
+                    var following = false,
+                        pre = document.createElement('pre'),
+                        code = document.createElement('code');
+                    pre.appendChild(code);
+                    document.body.appendChild(pre);
+                    return {
+                        clear: clear,
+                        follow: follow,
+                        log: print.bind(this, 'debug'),
+                        info: print.bind(this, 'info'),
+                        warn: print.bind(this, 'warn'),
+                        error: print.bind(this, 'error')
+                    };
+                    function clear() {
+                        while (code.hasChildNodes()) {
+                            code.removeChild(code.lastChild);
+                        }
+                    }
+                    function follow() {
+                        following = true;
+                    }                
+                    function print(className, object) {
+                        var s = (typeof object === 'string') ? object : JSON.stringify(object),
+                            span = document.createElement('span'),
+                            text = document.createTextNode(s + '\n');
 
-<head>
-    <meta charset="UTF-8">
-    <title>Sample Site</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <style>
-        body {
-            padding-top: 50px;
-        }
-    </style>
-</head>
+                        span.setAttribute('class', className);
+                        span.appendChild(text);
+                        code.appendChild(span);
 
-<body>
+                        if (following) {
+                            scrollToBottom();
+                        }
+                    }
 
-    <div class="container">
-        <div class="jumbotron">
-            <h1>res.sendFile() Works!</h1>
-        </div>
-    </div>
-
-</body>
-
+                    function scrollToBottom() {
+                        window.scrollTo(0, document.body.scrollHeight);
+                    }
+                }());
+                
+                // read logs
+                let date_ob = new Date();
+                let selectedYear = date_ob.getFullYear()
+                let selectedMonth = date_ob.getMonth() + 1
+                let selectedDay = date_ob.getDate()
+                async function getData(url) {
+                    const response = await fetch(
+                        url,
+                        {
+                            method: "GET",
+                            headers: {
+                                "month": selectedMonth,
+                                "year": selectedYear,
+                                "day": selectedDay
+                            }
+                        }
+                    );
+                    //const jsonResponse = await response.json();
+                    return response;
+                } 
+                async function readLogs() {
+                    var ip = location.host;
+                    const baseURL = "http://" + ip 
+                    const result = await getData(baseURL + "/api/logs")
+                    if(result.status == 200){
+                        const data = await result.json()
+                        const combined = data["combined"]
+                        const errors = data["errors"]
+                        let combinedLines = []
+                        let startIndex = 0;
+                        while (true) {
+                            const endIndex = combined.indexOf('\r\n', startIndex);
+                            if (endIndex === -1) {
+                                // No more '\r\n' found, break the loop
+                                combinedLines.push(combined.slice(startIndex));
+                                break;
+                            } else {
+                                combinedLines.push(combined.slice(startIndex, endIndex));
+                                startIndex = endIndex + 2; // Move the start index past '\r\n'
+                            }
+                        }
+                        let errorLines = []
+                        startIndex = 0;
+                        while (true) {
+                            const endIndex = errors.indexOf('\r\n', startIndex);
+                            if (endIndex === -1) {
+                                // No more '\r\n' found, break the loop
+                                errorLines.push(errors.slice(startIndex));
+                                break;
+                            } else {
+                                errorLines.push(errors.slice(startIndex, endIndex));
+                                startIndex = endIndex + 2; // Move the start index past '\r\n'
+                            }
+                        }
+                        console.clear()
+                        for(const line of combinedLines){
+                            if(line[26] == "I" && line[27] == "N" && line[28] == "F" && line[29] == "O"){
+                                console.log(line)
+                            }else{
+                                console.error(line)
+                            }
+                        }
+                        scrollToBottom()
+                    }
+                }
+                setInterval(readLogs, 2000); 
+            </script>
+    </body>
 </html>

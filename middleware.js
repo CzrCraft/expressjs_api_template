@@ -1,6 +1,7 @@
 const logger = require("./logger")
 const mainFile = require("./index")
 const procHandler = require("./procHandler")
+const sha256 = require('sha256');
 let configsJSON;
 let securityToken = undefined
 const fs = require("fs")
@@ -23,14 +24,46 @@ module.exports = async function (req, res, next) {
                 req.procID = procID;
                 next();
             } else {
+                // ignore favicon request for now
                 if (req.originalUrl != "/favicon.ico") {
                     let gonnaKms = mainFile.getRouteDetails(req.originalUrl)
                     if (gonnaKms["IGNORE_TOKEN"] != undefined) {
-                        logger.announce("Accessed the API !WITH NO TOKEN! : " + req.originalUrl, req)
-                        req.configs = configsJSON
-                        const procID = await procHandler.createProc();
-                        req.procID = procID;
-                        next();
+                        if (gonnaKms["CHECK_COOKIE"] != undefined) {
+                            const orgToken = configsJSON["serverSettings"]["auth"]["accessToken"]
+                            const hashedCookie = req.cookies["accessCookie"]
+                            const hashedToken = sha256(orgToken)
+                            if (hashedCookie == hashedToken) {
+                                if (gonnaKms["DONT_LOG_ACCESS"] == undefined) {
+                                    logger.announce("Accessed the API !WITH NO TOKEN! : " + req.originalUrl, req)
+                                }
+                                req.configs = configsJSON
+                                let procID;
+                                if (gonnaKms["DONT_LOG_ACCESS"] == undefined) {
+                                    procID = await procHandler.createProc();
+                                } else {
+                                    procID = await procHandler.createProc(true);
+                                }
+                                req.procID = procID;
+                                next();
+                            } else {
+                                if (gonnaKms["COOKIE_FAILURE_CALLBACK"] != undefined) {
+                                    gonnaKms["COOKIE_FAILURE_CALLBACK"](req, res)
+                                } 
+                            }
+                        } else {
+                            if (gonnaKms["DONT_LOG_ACCESS"] == undefined) {
+                                logger.announce("Accessed the API !WITH NO TOKEN! : " + req.originalUrl, req)
+                            }
+                            req.configs = configsJSON
+                            let procID;
+                            if (gonnaKms["DONT_LOG_ACCESS"] == undefined) {
+                                procID = await procHandler.createProc();
+                            } else {
+                                procID = await procHandler.createProc(true);
+                            }
+                            req.procID = procID;
+                            next();
+                        }
                     } else {
                         res.status = 400;
                         res.send("INVALID AUTH TOKEN!")
