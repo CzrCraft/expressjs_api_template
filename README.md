@@ -45,10 +45,23 @@
     ur_route_name-it_dont_matter: class extends template.Route{
         constructor() {
             // actuall route like for example github.com/CzrCraft where /CzrCraft is the route
-            const route = "/exampleRoute"
+
+            // MAKE SURE THAT YOU HAVE A SLASH AFTER THE ROUTE!!!!
+            // THIS WILL SAVE U A LOT OF HEADACHES!!
+
+            const route = "/exampleRoute/"
+            // syntax for super(routeName, dynamic routes(save them as purely their name, and without their /:, object that specified the addittional properties listed down below
             super(route);
             // can be accessed using urdomain.com/exampleRoute
             // where ur domain can be ur ip etc...
+
+            // there are also addittional properties that can be passed to the route constructor
+            // IGNORE_TOKEN: this route will be accessible without the access token getting specified in the headers
+            // OWN_ALL_CHILD_ROUTES: if you want to have something like a dynamic route something/:some
+            //                       this will make so that any route that is a child of this route will have the same properties
+            // DONT_LOG_ACCESS: if you don't want this route to save to logs when it gets accessed. Any custom logging will be saved, only the default logging won't be saved
+            // CHECK_COOKIE: when serving web pages, this will make it so it will check the cookie called "accessCookie" with the sha256 of the accessToken
+            // COOKIE_FAILURE_CALLBACK: if you have CHECK_COOKIE on, then this function will be called when someone has the wrong cookie/no cookies
         }
         // any HTTP method can be declared here with the following syntax
         async GET(req, res) {
