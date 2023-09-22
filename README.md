@@ -54,6 +54,7 @@
         async GET(req, res) {
             try {
                 // if the operation the request is doing doesn't need loading or lookup at a later time you should delete the proccess
+                // if you have an operation that does require look up at a later time you can use get proc status(look in proc.js route file)
                 logger.announnce("hello am doing someting")
                 // like this
                 procHandler.deleteProc(req.procID);
@@ -64,4 +65,28 @@
         }
     },
    }
+````
+# CONFIGS
+i'm gonna add ssl certificate support soon
+````
+{
+    "serverSettings": {
+        "port": the port you want the api to be(leave blank for default),
+        "auth": {
+            "accessToken": "this is used for authetification, specified in token header on request",
+            "managerUser": "for the web GUI",
+            "managerPassword": "for the web GUI"
+        },
+        "logger": {
+            "logToDiscord": false,
+            "botName": "your bots name(this is how it's going to appear on discord",
+            "botIcon": "it's icon",
+            "infoAndErrorWebhook": "the webhook links which will be used to send messages",
+            "errorOnlyWebhook": "the webhook links which will be used to send messages"
+        }
+    },
+    "customSettings": {
+       "test": "here you can put any setting you want, and acces it using req.configs
+    }
+}
 ````
