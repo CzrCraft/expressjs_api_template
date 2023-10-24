@@ -67,7 +67,7 @@ module.exports = async function (req, res, next) {
                     } else {
                         res.status = 400;
                         res.send("INVALID AUTH TOKEN!")
-                        logger.announceError("Failed to access the API", req)
+                        logger.announceError("Failed to access the API : " + req.originalUrl, req)
                     }
                 }
             }

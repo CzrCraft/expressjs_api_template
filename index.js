@@ -4,7 +4,7 @@ const app = express();
 const fs = require("fs")
 const logger = require("./logger")
 const customMiddleware = require("./middleware")
-const routeTemplate = require("./routes/template")
+const template = require("./routes/template")
 const cookieParser = require("cookie-parser")
 let extraRouteDetails = {}
 app.use(cookieParser());
@@ -14,13 +14,25 @@ function isClass(variable) {
     return typeof variable === 'function' && variable.prototype && variable.prototype.constructor === variable;
 }
 
+function getInstanceVariables(instance) {
+    // thank u chat gpt :D
+    const variableNames = Object.getOwnPropertyNames(instance);
+    const variablesObject = {};
+
+    for (const variableName of variableNames) {
+        variablesObject[variableName] = instance[variableName];
+    }
+
+    return variablesObject;
+}
+
 async function checkDirAndImport(path) {
     const routesFiles = await fs.readdirSync(path)
     let result = []
     for (const routeFile of routesFiles) {
         // make sure is javascript file
         const isFile = !fs.lstatSync(path + routeFile).isDirectory()
-        if (isFile && routeFile.includes(".js")) {
+        if (isFile && routeFile.includes(".js") && !routeFile.includes(".json")) {
             // get only the file name and import it
             const newInclude = require(path + routeFile.split(".")[0])
             // so that files like template.js get skipped
@@ -33,7 +45,7 @@ async function checkDirAndImport(path) {
                     if (isClass(value)) {
                         // don't know why i save em
                         const valueInstance = new value()
-                        if (valueInstance instanceof routeTemplate.Route) {
+                        if (valueInstance instanceof template.Route) {
                             let extraDetails = {
                                 route: "/api/" + valueInstance.path,
                                 content: {}
@@ -56,12 +68,20 @@ async function checkDirAndImport(path) {
                             app.patch(routePath, valueInstance.PATCH)
                             app.options(routePath, valueInstance.OPTIONS)
                             result.push(valueInstance);
-                            extraDetails["content"]["IGNORE_TOKEN"] = valueInstance["IGNORE_TOKEN"]
-                            extraDetails["content"]["OWN_ALL_CHILD_ROUTES"] = valueInstance["OWN_ALL_CHILD_ROUTES"]
-                            extraDetails["content"]["DONT_LOG_ACCESS"] = valueInstance["DONT_LOG_ACCESS"]
-                            extraDetails["content"]["CHECK_COOKIE"] = valueInstance["CHECK_COOKIE"]
-                            extraDetails["content"]["COOKIE_FAILURE_CALLBACK"] = valueInstance["COOKIE_FAILURE_CALLBACK"]
-                            extraRouteDetails[extraDetails.route] = extraDetails["content"]
+                            // really running out of names😭
+                            const addittionalShit = getInstanceVariables(valueInstance)
+                            for (const key in addittionalShit) { 
+                                extraDetails["content"][key] = addittionalShit[key]
+                                // extraDetails["content"]["IGNORE_TOKEN"] = valueInstance["IGNORE_TOKEN"]
+                                // extraDetails["content"]["OWN_ALL_CHILD_ROUTES"] = valueInstance["OWN_ALL_CHILD_ROUTES"]
+                                // extraDetails["content"]["DONT_LOG_ACCESS"] = valueInstance["DONT_LOG_ACCESS"]
+                                // extraDetails["content"]["CHECK_COOKIE"] = valueInstance["CHECK_COOKIE"]
+                                // extraDetails["content"]["COOKIE_FAILURE_CALLBACK"] = valueInstance["COOKIE_FAILURE_CALLBACK"]
+                                extraRouteDetails[extraDetails.route] = extraDetails["content"]
+                            }
+                        } else if (valueInstance instanceof template.UtilitiesFunction) {
+                            valueInstance.startup()
+                            result.push(valueInstance);
                         }
                     }
                 }

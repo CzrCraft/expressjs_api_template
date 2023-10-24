@@ -28,8 +28,23 @@ module.exports = {
         }
     },
 }
+
+function formatLocalTime() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const millySeconds = String(now.getMilliseconds()).padStart(3, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}:${millySeconds}Z`;
+}
+
 const logFormat = winston.format.printf(({ level, message, timestamp }) => {
-    return `${timestamp} [${level.toUpperCase()}]: ${message}`;
+    const customTimestamp = new Date().toLocaleString(); // Get local time
+    return `${formatLocalTime()} [${level.toUpperCase()}]: ${message}`;
 });
 let date_ob = new Date();
 const logger = winston.createLogger({
@@ -37,6 +52,7 @@ const logger = winston.createLogger({
     format: winston.format.combine(winston.format.timestamp(), logFormat,),
     exitOnError: false,
     timestamp: true,
+    localTime: true,
     transports: [
         new winston.transports.Console(),
         new winston.transports.File({ filename: 'logs/' + date_ob.getFullYear() + "/" + "Month-" + (date_ob.getMonth() + 1) + "/" + "Day-" + date_ob.getDate() + "/" + 'error.log', level: 'error' }),

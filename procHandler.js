@@ -67,4 +67,7 @@ module.exports = {
             throw "Incorrect parameters passed to deleteProc";
         }
     },
+    getAllProc: async function () {
+        return procArray;
+    },
 }

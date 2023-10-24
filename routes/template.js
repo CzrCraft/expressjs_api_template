@@ -5,7 +5,7 @@ module.exports = {
     // just look at other files
     IGNORE_FILE: function () { 
         // so that this file is skipped because this has no valid routes
-        // IGNORE_FILE can be a function a variable it can be anything as long as it's
+        // IGNORE_FILE can be a function, a variable it can be anything as long as it's
         // value isn't "undefined"
     },
     Route: class {
@@ -42,5 +42,16 @@ module.exports = {
         async OPTIONS(req, res) { res.sendStatus(400) }
         async TRACE(req, res) { res.sendStatus(400) }
         async PATCH(req, res) { res.sendStatus(400) }
+    },
+    UtilitiesFunction: class {
+        constructor() { }
+        
+        async startup() { }
+    },
+    Command: class {
+        constructor(commandString) {
+            this.commandString = commandString
+        }
+        async called(params) {}
     }
 }
