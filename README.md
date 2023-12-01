@@ -7,6 +7,10 @@
 
 -- add a way for people to use the user system and local database easily
 
+-- fix manager cuz currently it's broken / redo it
+
+-- documentation for the command system in the manager
+
 # expressJS_api_template
  Basic express JS API template for easy use
 
