@@ -18,7 +18,7 @@
 * use *npm install* or something like that to install all required packages
 * then place ur files inside the routes directory
 
-# IF YOU STUPID AND DON'T UNDERSTAND GO LOOK in proc.js
+# example in proc.js
  
 * how this shit works:
 *   each route is a child class of the route class thats inside template.js
