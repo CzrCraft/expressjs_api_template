@@ -30,7 +30,6 @@
 *   and you dont need to initiate the class cuz the template will automatically initiate ur class
 *   all u need to do is define it
 *   also name don't matter
-*   multiple clasess can have the same name just make sure that they have different routes
  
 # stuff 2 know:
 *    -you can access the configs object by using req.configs
