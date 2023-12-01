@@ -7,6 +7,10 @@
 
 -- add a way for people to use the user system and local database easily
 
+-- fix manager cuz currently it's broken / redo it
+
+-- documentation for the command system in the manager
+
 # expressJS_api_template
  Basic express JS API template for easy use
 
@@ -14,7 +18,7 @@
 * use *npm install* or something like that to install all required packages
 * then place ur files inside the routes directory
 
-# IF YOU STUPID AND DON'T UNDERSTAND GO LOOK in proc.js
+# example in proc.js
  
 * how this shit works:
 *   each route is a child class of the route class thats inside template.js
@@ -26,7 +30,6 @@
 *   and you dont need to initiate the class cuz the template will automatically initiate ur class
 *   all u need to do is define it
 *   also name don't matter
-*   multiple clasess can have the same name just make sure that they have different routes
  
 # stuff 2 know:
 *    -you can access the configs object by using req.configs
@@ -38,7 +41,6 @@
 *    it has a login which is set in the config file
 *    you also have commands 4 it --- i have to make a tut for them
 
-* *also i'm gonna add logging to discord soon*
 
 # HOW THE LOGGING WORKS
 * basically you need to use logger.announce for regular stuff like printing
