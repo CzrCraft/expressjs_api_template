@@ -1,3 +1,12 @@
+# TODO:
+-- implement user system like in CRM
+
+-- with permisions
+
+-- change manager so it uses the user system
+
+-- add a way for people to use the user system and local database easily
+
 # expressJS_api_template
  Basic express JS API template for easy use
 
@@ -25,6 +34,9 @@
 *    -also each request will like generate a new proccess wich you can access using req.procID
 *    -all of the proccesses functionallity is inside procHandler.js so use that to delete proccesses etc..
 *    -that's about it have fun
+*    -also the api has a manager at url/api/manager
+*    it has a login which is set in the config file
+*    you also have commands 4 it --- i have to make a tut for them
 
 * *also i'm gonna add logging to discord soon*
 
