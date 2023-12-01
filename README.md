@@ -1,3 +1,9 @@
+# TODO:
+-- implement user system like in CRM
+-- with permisions
+-- change manager so it uses the user system
+-- add a way for people to use the user system and local database easily
+
 # expressJS_api_template
  Basic express JS API template for easy use
 
