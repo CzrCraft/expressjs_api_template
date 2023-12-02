@@ -32,6 +32,7 @@
 *   also name don't matter
  
 # stuff 2 know:
+*     -WHEN USING ROUTE OPTIONS, REMEMBER THAT THE SUPER PARAMETERS ARE ROUTE, PARAMS, THEN THE OPTIONS. IF THE ROUTE DOESN'T HAVE ANY PARAMETERS(aka dynamic routes) PUT UNDEFINED THERE
 *    -you can access the configs object by using req.configs
 *    -you can place files inside folders and it will still work
 *    -also each request will like generate a new proccess wich you can access using req.procID
