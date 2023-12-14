@@ -17,7 +17,7 @@
 # how 2 use
 * have  *NODE JS* installed
 * use *npm install* or something like that to install all required packages
-* then place ur files inside the routes directory
+* *ONLY FILES INSIDE THE ROUTES DIRECTORY WILL BE RUN*
 
 # example in proc.js
  
