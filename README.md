@@ -1,3 +1,4 @@
+
 # TODO:
 -- implement user system like in CRM
 
@@ -11,13 +12,14 @@
 
 -- documentation for the command system in the manager
 
+# ONLY FILES INSIDE THE ROUTES DIRECTORY WILL BE RUN
+
 # expressJS_api_template
  Basic express JS API template for easy use
 
 # how 2 use
 * have  *NODE JS* installed
 * use *npm install* or something like that to install all required packages
-* *ONLY FILES INSIDE THE ROUTES DIRECTORY WILL BE RUN*
 
 # example in proc.js
  
