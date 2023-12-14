@@ -15,6 +15,7 @@
  Basic express JS API template for easy use
 
 # how 2 use
+* have  *NODE JS* installed
 * use *npm install* or something like that to install all required packages
 * then place ur files inside the routes directory
 
