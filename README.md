@@ -68,8 +68,10 @@
             // THIS WILL SAVE U A LOT OF HEADACHES!!
 
             const route = "/exampleRoute/"
+            const dynamicRouteParameters = undefined
+            const extraOptions = {}
             // syntax for super(routeName, dynamic routes(save them as purely their name, and without their /:, object that specified the addittional properties listed down below
-            super(route);
+            super(route, dynamicRouteParameters, extraOptions);
             // can be accessed using urdomain.com/exampleRoute
             // where ur domain can be ur ip etc...
 
