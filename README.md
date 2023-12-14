@@ -94,6 +94,75 @@
     },
    }
 ````
+
+# EXAMPLE WORKING MANAGER COMMAND
+````
+    proccessCommands: class extends template.Command{
+        constructor() {
+            const command = "proc" // the command itself
+            super(command);
+        }
+        async called(params) {// all params are split at space then given here as a list
+            function printHelp() {
+                const paramsObject = {
+                    "-h": "show list of available commands",
+                    "-s": "get a proccess's status(command + proccessID)",
+                    "-c": "create a proccess",
+                    "-d": "delete a proccess(command + proccessID)",
+                    "-m": "modify a proccess's status(command + procID + new status + new info)",
+                    "-a": "see all of the current proccesses",
+                }
+                logger.announce(parseJsonToOutput(paramsObject))
+            }
+            if (params == undefined || params == "") {
+                logger.announce("Specify a command")
+                printHelp()
+            } else {
+                switch (params[0]) {// how i manage params
+                    case "-h":
+                        printHelp()
+                        break;
+                    case "-s":
+                        const proccessID = params[1]
+                        if (proccessID != undefined) {
+                            const result = await procHandler.getProcInfo(proccessID)
+                            if (result == undefined) {
+                                logger.announceError("Proccess not found")
+                            } else {
+                                logger.announce(parseJsonToOutput(result))
+                            }
+                            
+                        } else {
+                            logger.announceError("Input to proc -s SHOULD BE THE PROCCESS ID")
+                        }
+                        break;
+                    case "-c":
+                        const proc = await procHandler.createProc(true)
+                        logger.announce("CREATED PROCCESS WITH THIS ID: " + proc)
+                        break;
+                    case "-d":
+                        const procID = params[1]
+                        if (procID != undefined) {
+                            await procHandler.deleteProc(procID)
+                        }
+                        break;
+                    case "-a":
+                        const result = await procHandler.getAllProc()
+                        logger.announce(parseJsonToOutput(result))
+                    case "-m":
+                        const procid = params[1]
+                        const newStatus = params[2]
+                        const newInfo = params[3]
+                        if (procid != undefined && newStatus != undefined && newInfo != undefined) {
+                            await procHandler.updateProcStatus(procid, newStatus, newInfo)
+                        } else {
+                            logger.announce
+                        }
+                }
+            }
+        }
+    },
+````
 # CONFIGS
 i'm gonna add ssl certificate support soon
 ````
