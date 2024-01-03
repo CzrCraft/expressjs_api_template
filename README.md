@@ -192,3 +192,15 @@ i'm gonna add ssl certificate support soon
     }
 }
 ````
+# DATABASE FORMATS/DOCUMENTATION
+
+security token format: creationEpoch-randomToken-expirationEpoch
+
+user save format:
+````
+username: {
+     password: password,
+     permissions: [],
+     token: lastSecurityTokenGenerated
+}
+````
