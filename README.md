@@ -204,3 +204,23 @@ username: {
      token: lastSecurityTokenGenerated
 }
 ````
+
+# MIDDLEWARE DOCUMENTATION
+
+so basically the middleware proccesses the request before calling the apropriate function
+
+each check OVERRIDES THE PREVIOUS ONE
+
+first the middleware checks the token:
+
+           1.check if the token is expired[if(currentEpoch<expirationEpoch)
+           
+           2.check what account is associated with this token
+           
+next the middleware checks if the route has the IGNORE_TOKEN flag which OVERRIDES the previous check
+
+next the middleware checks if the route has the CHECK_COOKIE flag which checks the users cookie, used when a route is interacted from a browser for example
+
+next the middleware checks if the route doesnt have THE IGNORE_TOKEN or CHECK_COOKIE flags and if it HAS the RESTRICTED flag, and if so check if the user has permission for said route
+
+after all of this the middleware then looks to see if any of theese previous checks failed(again, each check overrides the previous one, for example if the user doesnt have a token but the route has IGNORE_TOKEN, then both checks are considered true), and if they did it responds with which check failed, but if all the checks are ok then the middleware res the req.configs and req.procID headers and calls the next function.
