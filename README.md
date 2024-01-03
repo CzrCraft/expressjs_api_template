@@ -195,7 +195,9 @@ i'm gonna add ssl certificate support soon
 # DATABASE FORMATS/DOCUMENTATION
 
 security token format: creationEpoch-randomToken-expirationEpoch
+
 epoch used is in milliseconds so use Date.now() to get currentEpoch
+
 user save format:
 ````
 username: {
