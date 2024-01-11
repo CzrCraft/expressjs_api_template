@@ -12,6 +12,8 @@
 
 -- documentation for the command system in the manager
 
+-- documentation for proccess system
+
 # ONLY FILES INSIDE THE ROUTES DIRECTORY WILL BE RUN
 
 # expressJS_api_template
@@ -226,3 +228,23 @@ first the middleware checks the token:
 ->next the middleware checks if the route doesnt have THE IGNORE_TOKEN or CHECK_COOKIE flags and if it HAS the RESTRICTED flag, and if so check if the user has permission for said route
 
 ->after all of this the middleware then looks to see if any of theese previous checks failed(again, each check overrides the previous one, for example if the user doesnt have a token but the route has IGNORE_TOKEN, then both checks are considered true), and if they did it responds with which check failed, but if all the checks are ok then the middleware res the req.configs and req.procID headers and calls the next function.
+
+# PROCCESSES DOCUMENTATION(unfinished)
+
+so when a request is made the middleware creates a new "proccess" with an id
+
+this is used when you have something that loads in the background, and an app can interogate the API for the status of this proccess
+
+theese proccesses should be used for stuff that needs to be saved or accessed repeteadly, otherwise delete them at the end of your request using ````procHandler.deleteProc(req.procID);````
+
+when you update a proccesses status you use ````await procHandler.updateProcStatus(req.procID, newStatus, newInfo(optional))```` 
+
+the proccess format is this:
+````
+{
+    "status": the status,
+    "info": extra info about this proccess, for example it can be used when something is accessed repeteadly
+}
+````
+
+the rest of the code is in ````procHandler.js````
