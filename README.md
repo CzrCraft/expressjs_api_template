@@ -1,3 +1,4 @@
+
 # TODO:
 -- implement user system like in CRM
 
@@ -11,12 +12,16 @@
 
 -- documentation for the command system in the manager
 
+-- documentation for proccess system
+
+# ONLY FILES INSIDE THE ROUTES DIRECTORY WILL BE RUN
+
 # expressJS_api_template
  Basic express JS API template for easy use
 
 # how 2 use
+* have  *NODE JS* installed
 * use *npm install* or something like that to install all required packages
-* then place ur files inside the routes directory
 
 # example in proc.js
  
@@ -32,6 +37,7 @@
 *   also name don't matter
  
 # stuff 2 know:
+*     -WHEN USING ROUTE OPTIONS, REMEMBER THAT THE SUPER PARAMETERS ARE ROUTE, PARAMS, THEN THE OPTIONS. IF THE ROUTE DOESN'T HAVE ANY PARAMETERS(aka dynamic routes) PUT UNDEFINED THERE
 *    -you can access the configs object by using req.configs
 *    -you can place files inside folders and it will still work
 *    -also each request will like generate a new proccess wich you can access using req.procID
@@ -64,8 +70,10 @@
             // THIS WILL SAVE U A LOT OF HEADACHES!!
 
             const route = "/exampleRoute/"
+            const dynamicRouteParameters = undefined
+            const extraOptions = {}
             // syntax for super(routeName, dynamic routes(save them as purely their name, and without their /:, object that specified the addittional properties listed down below
-            super(route);
+            super(route, dynamicRouteParameters, extraOptions);
             // can be accessed using urdomain.com/exampleRoute
             // where ur domain can be ur ip etc...
 
@@ -93,6 +101,75 @@
     },
    }
 ````
+
+# EXAMPLE WORKING MANAGER COMMAND
+````
+    proccessCommands: class extends template.Command{
+        constructor() {
+            const command = "proc" // the command itself
+            super(command);
+        }
+        async called(params) {// all params are split at space then given here as a list
+            function printHelp() {
+                const paramsObject = {
+                    "-h": "show list of available commands",
+                    "-s": "get a proccess's status(command + proccessID)",
+                    "-c": "create a proccess",
+                    "-d": "delete a proccess(command + proccessID)",
+                    "-m": "modify a proccess's status(command + procID + new status + new info)",
+                    "-a": "see all of the current proccesses",
+                }
+                logger.announce(parseJsonToOutput(paramsObject))
+            }
+            if (params == undefined || params == "") {
+                logger.announce("Specify a command")
+                printHelp()
+            } else {
+                switch (params[0]) {// how i manage params
+                    case "-h":
+                        printHelp()
+                        break;
+                    case "-s":
+                        const proccessID = params[1]
+                        if (proccessID != undefined) {
+                            const result = await procHandler.getProcInfo(proccessID)
+                            if (result == undefined) {
+                                logger.announceError("Proccess not found")
+                            } else {
+                                logger.announce(parseJsonToOutput(result))
+                            }
+                            
+                        } else {
+                            logger.announceError("Input to proc -s SHOULD BE THE PROCCESS ID")
+                        }
+                        break;
+                    case "-c":
+                        const proc = await procHandler.createProc(true)
+                        logger.announce("CREATED PROCCESS WITH THIS ID: " + proc)
+                        break;
+                    case "-d":
+                        const procID = params[1]
+                        if (procID != undefined) {
+                            await procHandler.deleteProc(procID)
+                        }
+                        break;
+                    case "-a":
+                        const result = await procHandler.getAllProc()
+                        logger.announce(parseJsonToOutput(result))
+                    case "-m":
+                        const procid = params[1]
+                        const newStatus = params[2]
+                        const newInfo = params[3]
+                        if (procid != undefined && newStatus != undefined && newInfo != undefined) {
+                            await procHandler.updateProcStatus(procid, newStatus, newInfo)
+                        } else {
+                            logger.announce
+                        }
+                }
+            }
+        }
+    },
+````
 # CONFIGS
 i'm gonna add ssl certificate support soon
 ````
@@ -117,3 +194,57 @@ i'm gonna add ssl certificate support soon
     }
 }
 ````
+# DATABASE FORMATS/DOCUMENTATION
+
+security token format: creationEpoch-randomToken-expirationEpoch
+
+epoch used is in milliseconds so use Date.now() to get currentEpoch
+
+user save format:
+````
+username: {
+     password: password,
+     permissions: [],
+     token: lastSecurityTokenGenerated
+}
+````
+
+# MIDDLEWARE DOCUMENTATION
+
+so basically the middleware proccesses the request before calling the apropriate function
+
+each check OVERRIDES THE PREVIOUS ONE
+
+first the middleware checks the token:
+
+           1.check if the token is expired[if(currentEpoch<expirationEpoch)]
+           
+           2.check what account is associated with this token
+           
+->next the middleware checks if the route has the IGNORE_TOKEN flag which OVERRIDES the previous check
+
+->next the middleware checks if the route has the CHECK_COOKIE flag which checks the users cookie, used when a route is interacted from a browser for example
+
+->next the middleware checks if the route doesnt have THE IGNORE_TOKEN or CHECK_COOKIE flags and if it HAS the RESTRICTED flag, and if so check if the user has permission for said route
+
+->after all of this the middleware then looks to see if any of theese previous checks failed(again, each check overrides the previous one, for example if the user doesnt have a token but the route has IGNORE_TOKEN, then both checks are considered true), and if they did it responds with which check failed, but if all the checks are ok then the middleware res the req.configs and req.procID headers and calls the next function.
+
+# PROCCESSES DOCUMENTATION(unfinished)
+
+so when a request is made the middleware creates a new "proccess" with an id
+
+this is used when you have something that loads in the background, and an app can interogate the API for the status of this proccess
+
+theese proccesses should be used for stuff that needs to be saved or accessed repeteadly, otherwise delete them at the end of your request using ````procHandler.deleteProc(req.procID);````
+
+when you update a proccesses status you use ````await procHandler.updateProcStatus(req.procID, newStatus, newInfo(optional))```` 
+
+the proccess format is this:
+````
+{
+    "status": the status,
+    "info": extra info about this proccess, for example it can be used when something is accessed repeteadly
+}
+````
+
+the rest of the code is in ````procHandler.js````
