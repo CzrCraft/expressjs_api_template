@@ -1,4 +1,29 @@
+const reasons = { // global response failure reasons
+    // same set of reasons will be inside the app in used as keys in a dict for responses
+    auth: {
+        token: {
+            invalid: "auth_token_invalid",
+            expired: "auth_token_expired",
+            format: {
+                invalid: "auth_token_format_invalid"
+            }
+        },
+        cookie: {
+            invalid: "auth_cookie_invalid",
+        },
+        permissions: {
+            userDoesntHave: "auth_user_permissions_lack",
+        }
+    },
+    user: {
+        exists: "user_exists",
+        doesntExist: "user_notExists",
+        invalidUsernameOrPassword: "user_headers_invalid",
+    }
+}
+
 module.exports = {
+    reasons: reasons,
     // boillerplate for other routes :)
     // if someone other than my retarded ass reading this
     // and don't know how this shet works
@@ -19,6 +44,7 @@ module.exports = {
                 this.DONT_LOG_ACCESS = options["DONT_LOG_ACCESS"]
                 this.CHECK_COOKIE = options["CHECK_COOKIE"]
                 this.COOKIE_FAILURE_CALLBACK = options["COOKIE_FAILURE_CALLBACK"]
+                this.RESTRICTED = options["RESTRICTED"]
                 if (options["IGNORE_TOKEN"] == false) {
                     this.IGNORE_TOKEN = undefined
                 }
@@ -31,17 +57,32 @@ module.exports = {
                 if (options["CHECK_COOKIE"] == false) {
                     this.CHECK_COOKIE = undefined
                 }
+                if (options["RESTRICTED"] == undefined) {// default restricted ON 4 security
+                    this.RESTRICTED = true
+                }
+                if (options["RESTRICTED"] == false) {
+                    this.RESTRICTED = undefined
+                }
             }
         }
-        async GET(req, res) { res.sendStatus(400) }
-        async POST(req, res) { res.sendStatus(400) }
-        async PUT(req, res) { res.sendStatus(400) }
-        async DELETE(req, res) { res.sendStatus(400) }
-        async HEAD(req, res) { res.sendStatus(400) }
-        async CONNECT(req, res) { res.sendStatus(400) }
-        async OPTIONS(req, res) { res.sendStatus(400) }
-        async TRACE(req, res) { res.sendStatus(400) }
-        async PATCH(req, res) { res.sendStatus(400) }
+        async GET(req, res) { res.sendStatus(400); req.reqHandler.deleteReq(req.reqID);     }
+        async POST(req, res) { res.sendStatus(400); req.reqHandler.deleteReq(req.reqID);    }
+        async PUT(req, res) { res.sendStatus(400); req.reqHandler.deleteReq(req.reqID);     }
+        async DELETE(req, res) { res.sendStatus(400); req.reqHandler.deleteReq(req.reqID);  }
+        async HEAD(req, res) { res.sendStatus(400); req.reqHandler.deleteReq(req.reqID);    }
+        async CONNECT(req, res) { res.sendStatus(400); req.reqHandler.deleteReq(req.reqID); }
+        async OPTIONS(req, res) { res.sendStatus(400); req.reqHandler.deleteReq(req.reqID); }
+        async TRACE(req, res) { res.sendStatus(400); req.reqHandler.deleteReq(req.reqID);   }
+        async PATCH(req, res) { res.sendStatus(400); req.reqHandler.deleteReq(req.reqID);   }
+        // async GET(req, res) { }
+        // async POST(req, res) { }
+        // async PUT(req, res) { }
+        // async DELETE(req, res) { }
+        // async HEAD(req, res) { }
+        // async CONNECT(req, res) {}
+        // async OPTIONS(req, res) {}
+        // async TRACE(req, res) {}
+        // async PATCH(req, res) { }
     },
     UtilitiesFunction: class {
         constructor() { }

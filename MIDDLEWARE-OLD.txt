@@ -1,8 +1,7 @@
 const logger = require("./logger")
 const mainFile = require("./index")
-const reqHandler = require("./reqHandler")
-const userDB = require("./userDB")
-const template = require("./routes/template")
+const procHandler = require("./procHandler")
+const sha256 = require('sha256');
 let configsJSON;
 let securityToken = undefined
 const fs = require("fs")
@@ -13,7 +12,6 @@ fs.readFile("./config.json", "utf8", (err, jsonString) => {
         securityToken = configsJSON["serverSettings"]["auth"]["accessToken"];
     }
 })
-
 // i will set a property of req to the config string
 // so that any route can access it
 module.exports = async function (req, res, next) {
@@ -21,66 +19,26 @@ module.exports = async function (req, res, next) {
         if (securityToken != "") {
             let letPass = true;
             let noToken = false;
-            let reason = "";
-            let user;
-            let password;
-            const token = req.headers["token"];
+            const user = req.headers["username"]
+            const password = req.headers["password"]
             let gonnaKms = mainFile.getRouteDetails(req.originalUrl)
             // THE ORDER OF THE IF STATEMENTS MATTERS!!
-            // IF SOMEONE CHANGES THE ORDERS OF THEESE AND FUCKS THEM UP😭
-            // if (req.headers["token"] != securityToken) {
-            //     letPass = false;
-            //     reason = invalidAuthToken;
-            //     noToken = true;
-            // }
-            if (gonnaKms["CHECK_COOKIE"] != undefined) {// if CHECK_COOKIE is true, then extract token from cookie
-                token = req.cookies["accessCookie"]
-            }
-            if (token != "" && token != undefined) {
-                let [creationEpoch, randomToken, expirationEpoch] = token.split("-");
-                if (creationEpoch != undefined & randomToken != undefined & expirationEpoch != undefined) {
-                    if (Date.now() <= parseInt(expirationEpoch)) {
-                        const gottenUser = userDB.getUserFromToken(token)
-                        if (gottenUser) {
-                            user = Object.keys(gottenUser)[0];
-                            password = gottenUser[user].password;
-                        } else {
-                            letPass = false;
-                            reason = template.reasons.auth.invalidAuthToken;
-                        }
-                    } else {
-                        letPass = false;
-                        reason = template.reasons.auth.token.expired;
-                    }
-                } else {
-                    letPass = false;
-                    reason = template.reasons.auth.token.format.invalid;
-                }
-            } else {
+            if (req.headers["token"] != securityToken) {
                 letPass = false;
-                reason = template.reasons.auth.token.invalid;
                 noToken = true;
             }
             if (gonnaKms["IGNORE_TOKEN"] != undefined) {
                 letPass = true;
-                noToken = true;
             }
-            if (letPass) {// if token is expired skip this step for faster proccessing and correct error responses
-                if (gonnaKms["IGNORE_TOKEN"] == undefined && gonnaKms["CHECK_COOKIE"] == undefined && gonnaKms["RESTRICTED"] != undefined) {
-                    if (user != undefined && password != undefined && user != "" && password != "") {
-                        if (gonnaKms["RESTRICTED"] != undefined) {
-                            if (!userDB.checkPermission(user, req.originalUrl)) {
-                                letPass = false;
-                                reason = template.reasons.auth.permissions.userDoesntHave
-                            }
-                        }
-                    } else { 
-                        letPass = false;
-                        reason = template.reasons.auth.token.invalid;   
-                    }// if they're undefined then reason should be invalid auth token
+            if (gonnaKms["CHECK_COOKIE"] != undefined) {
+                const orgToken = configsJSON["serverSettings"]["auth"]["accessToken"]
+                const hashedCookie = req.cookies["accessCookie"]
+                const hashedToken = sha256(orgToken)
+                if (hashedCookie != hashedToken) {
+                    letPass = false;
+                    gonnaKms["COOKIE_FAILURE_CALLBACK"](req, res)
                 }
             }
-
             if (letPass) {
                 if (gonnaKms["DONT_LOG_ACCESS"] == undefined) {
                     if (noToken) {
@@ -88,26 +46,20 @@ module.exports = async function (req, res, next) {
                     } else {
                         logger.announce("Accessed the API: " + req.originalUrl, req)
                     }
-                    req.handler = reqHandler;
                     req.configs = configsJSON
-                    const reqID = await reqHandler.createReq();
-                    req.reqID = reqID;
-                    req.token = token;
-                    req.user = user;
+                    const procID = await procHandler.createProc();
+                    req.procID = procID;
                     next();
                 } else {
-                    req.handler = reqHandler;
                     req.configs = configsJSON
-                    const reqID = await reqHandler.createReq(true);
-                    req.reqID = reqID;
+                    const procID = await procHandler.createProc(true);
+                    req.procID = procID;
                     next();
                 }
             } else {
+                res.sendStatus(400);
                 logger.announce("Failed to access the API : " + req.originalUrl, req)
-                res.status(400);
-                res.send(reason);
             }
-            // old code don't use
             // if (req.headers["token"] == securityToken) {
             //     if (gonnaKms["DONT_LOG_ACCESS"] == undefined) {
             //         if (noToken) {
@@ -116,13 +68,13 @@ module.exports = async function (req, res, next) {
             //             logger.announce("Accessed the API: " + req.originalUrl, req)
             //         }
             //         req.configs = configsJSON
-            //         const reqID = await reqHandler.createReq();
-            //         req.reqID = reqID;
+            //         const procID = await procHandler.createProc();
+            //         req.procID = procID;
             //         next();
             //     } else {
             //         req.configs = configsJSON
-            //         const reqID = await reqHandler.createReq(true);
-            //         req.reqID = reqID;
+            //         const procID = await procHandler.createProc(true);
+            //         req.procID = procID;
             //         next();
             //     }
             // } else {
@@ -139,13 +91,13 @@ module.exports = async function (req, res, next) {
             //                         logger.announce("Accessed the API !WITH NO TOKEN! : " + req.originalUrl, req)
             //                     }
             //                     req.configs = configsJSON
-            //                     let reqID;
+            //                     let procID;
             //                     if (gonnaKms["DONT_LOG_ACCESS"] == undefined) {
-            //                         reqID = await reqHandler.createReq();
+            //                         procID = await procHandler.createProc();
             //                     } else {
-            //                         reqID = await reqHandler.createReq(true);
+            //                         procID = await procHandler.createProc(true);
             //                     }
-            //                     req.reqID = reqID;
+            //                     req.procID = procID;
             //                     next();
             //                 } else {
             //                     if (gonnaKms["COOKIE_FAILURE_CALLBACK"] != undefined) {
@@ -157,17 +109,17 @@ module.exports = async function (req, res, next) {
             //                     logger.announce("Accessed the API !WITH NO TOKEN! : " + req.originalUrl, req)
             //                 }
             //                 req.configs = configsJSON
-            //                 let reqID;
+            //                 let procID;
             //                 if (gonnaKms["DONT_LOG_ACCESS"] == undefined) {
-            //                     reqID = await reqHandler.createReq();
+            //                     procID = await procHandler.createProc();
             //                 } else {
-            //                     reqID = await reqHandler.createReq(true);
+            //                     procID = await procHandler.createProc(true);
             //                 }
-            //                 req.reqID = reqID;
+            //                 req.procID = procID;
             //                 next();
             //             }
             //         } else {
-            //             res.status(400);
+            //             res.status = 400;
             //             res.send("INVALID AUTH TOKEN!")
             //             logger.announceError("Failed to access the API : " + req.originalUrl, req)
             //         }

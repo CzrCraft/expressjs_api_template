@@ -6,6 +6,8 @@ const logger = require("./logger")
 const customMiddleware = require("./middleware")
 const template = require("./routes/template")
 const cookieParser = require("cookie-parser")
+const cluster = require('node:cluster');
+const { availableParallelism } = require('node:os')
 let extraRouteDetails = {}
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }))
@@ -96,27 +98,51 @@ async function checkDirAndImport(path) {
 }
 
 async function readConfigs(configJson) {
+
     const serverPort = configJson["serverSettings"]["port"]
     module.exports = {
         configJSON: configJson,
     }
-    logger.announce("Mapping routes...")
-    // map routes
-    const routes = await checkDirAndImport("./routes/");
-    console.log(routes);
-    // i would document this but i forgor how i did this😭
-    logger.announce("Mapped routes!")
-    logger.announce("Starting server...")
-    var server = app.listen(serverPort, function () {
-        logger.announce("Server has started on port " + serverPort)
-    })
+    if (cluster.isPrimary) {
+        logger.announce("--API IS STARTING--")
+        logger.announce("Starting server...")
+        const numCPUs = availableParallelism();
+        logger.announce(`Primary ${process.pid} is running`);
+        logger.announce(numCPUs + " avaialable cpu's");
+        logger.announce("Default behaviour; using all the cpu's");
+        // Fork workers.
+        for (let i = 0; i < numCPUs; i++) {
+            cluster.fork();
+        }
+
+        cluster.on('exit', (worker, code, signal) => {
+            logger.announce(`worker ${worker.process.pid} died`);
+            // startup new instance
+            cluster.fork();
+        });
+        logger.announce("Started server!");
+        logger.announce("Mapping routes...")
+        // // map routes
+        // const routes = await checkDirAndImport("./routes/");
+        // console.log(routes);
+        // i would document this but i forgor how i did this😭
+        logger.announce("Mapped routes!")
+        logger.announce(" --Master server has started-- ")
+    } else {
+        // Workers can share any TCP connection
+        // In this case it is an HTTP server
+        var server = app.listen(serverPort, function () {
+            logger.announce("New server instance started with pid: " + process.pid)
+            checkDirAndImport("./routes/");
+        })
+    }
+
+
 }
-logger.announce("---THE API IS STARTING--")
 fs.readFile("./config.json", "utf8", (err, jsonString) => {
     if (err) {
         logger.announceError("Failed to read config file :(")
     } else {
-        logger.announce("Read config file!")
         readConfigs(JSON.parse(jsonString))
     }
 })
@@ -146,29 +172,29 @@ exports.getRouteDetails = function (routePath) {
 
 
 
-function caca() {
-fs.readdir("./node_modules", function (err, dirs) {
-    if (err) {
-    console.log(err);
-    return;
-    }
-    dirs.forEach(function(dir){
-    if (dir.indexOf(".") !== 0) {
-        var packageJsonFile = "./node_modules/" + dir + "/package.json";
-        if (fs.existsSync(packageJsonFile)) {
-        fs.readFile(packageJsonFile, function (err, data) {
-            if (err) {
-            console.log(err);
-            }
-            else {
-            var json = JSON.parse(data);
-            console.log('"'+json.name+'": "' + json.version + '",');
-            }
-        });
-        }
-    }
-    });
+// function caca() {
+// fs.readdir("./node_modules", function (err, dirs) {
+//     if (err) {
+//     console.log(err);
+//     return;
+//     }
+//     dirs.forEach(function(dir){
+//     if (dir.indexOf(".") !== 0) {
+//         var packageJsonFile = "./node_modules/" + dir + "/package.json";
+//         if (fs.existsSync(packageJsonFile)) {
+//         fs.readFile(packageJsonFile, function (err, data) {
+//             if (err) {
+//             console.log(err);
+//             }
+//             else {
+//             var json = JSON.parse(data);
+//             console.log('"'+json.name+'": "' + json.version + '",');
+//             }
+//         });
+//         }
+//     }
+//     });
 
-});
-}
-caca();
+// });
+// }
+// caca();

@@ -1,7 +1,7 @@
 {
   "name": "expressjs_api_template",
   "version": "1.0.0",
-  "description": "-- implement user system like in CRM",
+  "description": "cacuta puta",
   "main": "index.js",
   "directories": {
     "doc": "docs"
@@ -24,6 +24,7 @@
     "cookie-parser": "^1.4.6",
     "discord-webhook-node": "^1.1.8",
     "express": "^4.18.2",
+    "file-system-db": "^2.0.0",
     "sha256": "^0.2.0",
     "winston": "^3.11.0"
   }

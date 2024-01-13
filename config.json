@@ -2,7 +2,9 @@
     "serverSettings": {
         "port": 42069,
         "auth": {
-            "accessToken": "somethingHere",
+            "defaultAccountPermissions": ["/api/caca"],
+            "tokenLifetime": 30,
+            "comment": "token lifetime is in DAYS, ALSO MAKE SURE IT IS A NUMBER NOT A STRING",
             "managerUser": "testUser",
             "managerPassword": "testPassword"
         },
