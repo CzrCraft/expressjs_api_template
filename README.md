@@ -18,7 +18,8 @@
 
 # expressJS_api_template
  Basic express JS API template for easy use
- READ https://github.com/CzrCraft/expressJS_api_template/issues/1
+ 
+ ##READ https://github.com/CzrCraft/expressJS_api_template/issues/1
 # how 2 use
 * have  *NODE JS* installed
 * use *npm install* or something like that to install all required packages
