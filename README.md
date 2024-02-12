@@ -1,8 +1,5 @@
 
 # TODO:
--- implement user system like in CRM
-
--- with permisions
 
 -- change manager so it uses the user system
 
@@ -14,11 +11,15 @@
 
 -- documentation for proccess system
 
+-- documentation for utillity system
+
+-- fix https://github.com/CzrCraft/expressJS_api_template/issues/1
 # ONLY FILES INSIDE THE ROUTES DIRECTORY WILL BE RUN
 
 # expressJS_api_template
  Basic express JS API template for easy use
-
+ 
+ **READ https://github.com/CzrCraft/expressJS_api_template/issues/1**
 # how 2 use
 * have  *NODE JS* installed
 * use *npm install* or something like that to install all required packages
