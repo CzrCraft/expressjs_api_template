@@ -97,7 +97,8 @@ module.exports = {
         }
         async startup() { }
         async test() {
-            logger.announce("Utillity does not have a test func")
+            await logger.announce("Utillity does not have a test func")
+            return "Utillity does not have a test func"
         }
     },
     Command: class {

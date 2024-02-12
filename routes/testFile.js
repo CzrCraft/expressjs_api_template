@@ -1,20 +1,59 @@
 const template = require("./template");
 const logger = require("../logger")
-function recursiveSearch(obj, currentPath) {
+let totCount = 0;
+async function recursiveUtillitySearch(obj, currentPath, count, req) {
     if (obj instanceof Object && !(obj instanceof template.Utillity)) {
+        let tempCount = count
         for (let i = 0; i < Object.keys(obj).length; i++) {
             let utily = obj[Object.keys(obj)[i]]
             if (utily instanceof Object) {
-                recursiveSearch(utily, currentPath + "." + Object.keys(obj)[i])
+                tempCount += await recursiveUtillitySearch(utily, currentPath + "." + Object.keys(obj)[i], tempCount, req)
             }
         }
+        return tempCount;
     } else {
         if (obj instanceof template.Utillity) {
-            logger.announce("Testing utillity: " + currentPath)
-            obj.test();
+            let passed = true;
+            let additionalInfo = "";
+            try {
+                additionalInfo = await obj.test();
+            } catch (err) {
+                passed = false;
+                additionalInfo = err;
+            }
+            // bag pula in ele da count ca e o bataie de cap
+            // logger.announce((passed ? "PASS " : "ERROR") + "  " + "(" + (count + 1) + "/" + totCount + ")  :  " + currentPath)
+            await logger.announceDynamic(passed, (passed ? "PASS " : "ERROR") + "  :  " + currentPath + (passed ? "" : "  --> check " + req.reqID + ".json"))
+            await req.handler.updateReqStatus(req.reqID, "testing utillities", [
+                currentPath,
+                (passed ? "PASS" : "ERROR"),
+                additionalInfo,
+            ])
+            return 1;
+        } else {
+            return 0;
         }
     }
 }
+// i hate this
+// function countUtilltyRecursives(obj, currentPath, count) {
+//     if (obj instanceof Object && !(obj instanceof template.Utillity)) {
+//         let tempCount = 0;
+//         for (let i = 0; i < Object.keys(obj).length; i++) {
+//             let utily = obj[Object.keys(obj)[i]]
+//             if (utily instanceof Object) {
+//                 tempCount += countUtilltyRecursives(utily, currentPath + "." + Object.keys(obj)[i], count)
+//             }
+//         }
+//         return count + tempCount;
+//     } else {
+//         if (obj instanceof template.Utillity) {
+//             return 1;
+//         } else {
+//             return 0;
+//         }
+//     }
+// }
 
 module.exports = {
     caca: class extends template.Route{
@@ -27,16 +66,22 @@ module.exports = {
                 res.send("CACA!!! >:3")
                 logger.announce("--testing utillities--")
                 let utilyes = req.utillities
-                for (let i = 0; i < Object.keys(utilyes).length; i++) {
-                    req.handler.updateReqStatus(req.reqID, "testing utillities", (i + 1) + "/" + Object.keys(utilyes).length)
+                // totCount = 0
+                // for (let i = 0; i < Object.keys(utilyes).length; i++) {
+                //     let utily = utilyes[Object.keys(utilyes)[i]]
+                //     if (utily instanceof Object) {
+                //         totCount += await countUtilltyRecursives(utily, Object.keys(utilyes)[i], 0)
+                //     }
+                // }
+                for (let i = 0; i < Object.keys(utilyes).length; i++) {                                                            
                     let utily = utilyes[Object.keys(utilyes)[i]]
                     if (utily instanceof Object) {
-                        recursiveSearch(utily, Object.keys(utilyes)[i])
+                        await recursiveUtillitySearch(utily, Object.keys(utilyes)[i], 0, req)
                     }
                 }
             } catch (err) {
                 logger.announceError(err, req)
-                res.send(500);
+                res.sendStatus(500);
             }
         }
     },

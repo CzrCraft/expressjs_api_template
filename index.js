@@ -159,12 +159,25 @@ async function checkDirAndImportUtillities(path) {
                             // really running out of names😭
                             // old ahh comment fr(only there cuz i copy paste code)
                             valueInstance.startup();
-                            let utillityFullPath = routeFile.split(".")[0] + "." + valueInstance.path
+                            let utillityFullPath = valueInstance.path
                             let pathToList = utillityFullPath.split(".")
                             let currentObj = ""
                             // what the fuck is happening here????
                             // scooby doo ass code(a big fucking mistery)
+
+                            // 12/2/2024 - i reread this code cuz poorly written, everything is retarded - cezar
+
                             for (let i = 0; i < pathToList.length; i++){
+                                //debug code
+                                // if (cluster.isPrimary) {
+                                //     //console.log(currentObj, ",", currentObj + pathToList[i])
+                                //     console.log("---------" +  (i + 1) + "/" + pathToList.length)
+                                //     console.log(utillityFullPath)
+                                //     console.log(pathToList)
+                                //     console.log(currentObj)
+                                //     console.log(currentObj + pathToList[i])
+                                    
+                                // }
                                 if (_.get(utillities, currentObj + pathToList[i]) == undefined) {
                                     if (i == pathToList.length - 1) { 
                                         _.set(utillities, currentObj + pathToList[i], valueInstance)
@@ -173,9 +186,10 @@ async function checkDirAndImportUtillities(path) {
                                     
                                     }
                                     currentObj += pathToList[i] + "."
+                                } else {
+                                    currentObj += pathToList[i] + "."
                                 }
                             }
-                            
                         }
                     }
                 }
@@ -206,7 +220,7 @@ async function readConfigs(configJson) {
         }
 
         cluster.on('exit', (worker, code, signal) => {
-            logger.announce(`worker ${worker.process.pid} died`);
+            logger.announce(`Server ${worker.process.pid} died`);
             // startup new instance
             cluster.fork();
         });

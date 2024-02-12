@@ -5,10 +5,17 @@ module.exports = {
     announce: async function (message, req) {
         if (req != null) {
             logger.info("-" + req.ip + "- " + message);
-            discord.sendInfo("-" + req.ip + "- " + message)
+            await discord.sendInfo("-" + req.ip + "- " + message)
         } else {
             logger.info(message);
-            discord.sendInfo(message)
+            await discord.sendInfo(message)
+        }
+    },
+    announceDynamic: async function (whatToDo, message, req) {
+        if (whatToDo) {
+            await this.announce(message, req)
+        } else {
+            await this.announceError(message, req)
         }
     },
     announceError: async function (message, req) {
@@ -21,8 +28,8 @@ module.exports = {
             const callerLine = stackLines[2].trim();
             logger.error("-" + req.ip + "- " + message);
             logger.error(callerLine)
-            discord.sendError("-" + req.ip + "- " + message)
-            discord.sendError(callerLine)
+            await discord.sendError("-" + req.ip + "- " + message)
+            await discord.sendError(callerLine)
             // now update req status to error
             req.handler.updateReqStatus(req.reqID, "error", {
                 "caller_ip": req.ip,
@@ -34,30 +41,30 @@ module.exports = {
             });
         } else {
             logger.error(message);
-            discord.sendError(message)
+            await discord.sendError(message)
         }
     },
-    logObject: async function (filename, jsObj) {
+    logObject: function (filename, jsObj) {
         const dir = getLogDir();
         if (!fs.existsSync(dir)){
             fs.mkdirSync(dir, { recursive: true });
         }
-        const jsonStr = JSON.stringify(jsObj);
+        const jsonStr = JSON.stringify(jsObj, null, 2);
         fs.writeFileSync(dir + filename + '.json', jsonStr, 'utf8');
     },
-    logProccess: async function (reqID, jsObj) {
+    logProccess: function (reqID, jsObj) {
         const dir = getLogDirFromEpoch(reqID.split("-")[0]);
         if (!fs.existsSync(dir)){
             fs.mkdirSync(dir, { recursive: true });
         }
-        const jsonStr = JSON.stringify(jsObj);
+        const jsonStr = JSON.stringify(jsObj, null, 2);
         fs.writeFileSync(dir + reqID + '.json', jsonStr, 'utf8');
     },
-    deleteReqcess: async function (reqID) {
+    deleteReqcess: function (reqID) {
         const dir = getLogDirFromEpoch(reqID.split("-")[0]);
         deleteFile(dir + reqID + ".json");
     },
-    getProccess: async function (reqID) { // time consuming operation, should not be used often
+    getProccess: function (reqID) { // time consuming operation, should not be used often
         const proccessCreation = reqID.split("-")[0]
         const dir = getLogDirFromEpoch(proccessCreation)
         const data = fs.readFileSync(dir + reqID + ".json", 'utf8');
