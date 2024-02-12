@@ -29,7 +29,8 @@ module.exports = {
         while (reqID in reqArray) {
             reqID = Date.now() + "-" + getRandomInt(10000000000)
         }
-        reqArray[reqID] = {
+        reqArray[reqID] = [];
+        reqArray[reqID][0] = {
             "status": "init",
             "info": "",
         };
@@ -47,8 +48,12 @@ module.exports = {
             //     // if new info wasn't specified, then don't set new info
             //     "info": (newInfo == "") ? reqArray[reqID]["info"] : newInfo
             // }
-            reqArray[reqID].status = newStatus;
-            reqArray[reqID].info = newInfo;
+            reqArray[reqID].push({
+                "status": newStatus,
+                "info": newInfo
+            })
+            // reqArray[reqID].status = newStatus;
+            // reqArray[reqID].info = newInfo;
             logger.logProccess(reqID, reqArray[reqID]);
         } else {
             logger.announceError("Undefined parameters passed to updateReqStatus")

@@ -158,20 +158,5 @@ module.exports = {
             }
         }
     },
-    caca: class extends template.Route{
-        constructor() {
-            const route = "caca"
-            super(route, undefined, {RESTRICTED: true});
-        }
-        async GET(req, res) {
-            try {
-                req.handler.updateReqStatus(req.reqID, "working", "test test")
-                req.handler.deleteReq(req.reqID)
-                res.send("CACA!!! >:3")
-            } catch (err) {
-                logger.announceError(err, req)
-                res.send(500);
-            }
-        }
-    },
+
 }

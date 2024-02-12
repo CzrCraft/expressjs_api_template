@@ -1,3 +1,4 @@
+const logger = require("../logger")
 const reasons = { // global response failure reasons
     // same set of reasons will be inside the app in used as keys in a dict for responses
     auth: {
@@ -84,10 +85,20 @@ module.exports = {
         // async TRACE(req, res) {}
         // async PATCH(req, res) { }
     },
-    UtilitiesFunction: class {
-        constructor() { }
-        
+    Utillity: class {
+        constructor(path) {
+            this.path = path;
+            // used for organizing
+            // so parent is the filename(for example deliciu.js -> deliciu)
+            // and this path is separated by a dot
+            // and objects are created based on this path
+            // for example the path "do.stuff" in the fille "foo" is going to end up as "foo.do.stuff"
+            // ends up {foo: {do: {stuff: func()}}}
+        }
         async startup() { }
+        async test() {
+            logger.announce("Utillity does not have a test func")
+        }
     },
     Command: class {
         constructor(commandString) {

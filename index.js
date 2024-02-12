@@ -1,4 +1,4 @@
-
+var _ = require('lodash');
 const express = require("express");
 const app = express();
 const fs = require("fs")
@@ -9,9 +9,11 @@ const cookieParser = require("cookie-parser")
 const cluster = require('node:cluster');
 const { availableParallelism } = require('node:os')
 let extraRouteDetails = {}
+let utillities = {}
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }))
-app.use(customMiddleware)
+
+app.use(customMiddleware.middleware)
 function isClass(variable) {
     return typeof variable === 'function' && variable.prototype && variable.prototype.constructor === variable;
 }
@@ -28,7 +30,7 @@ function getInstanceVariables(instance) {
     return variablesObject;
 }
 
-async function checkDirAndImport(path) {
+async function checkDirAndImportRoutes(path) {
     const routesFiles = await fs.readdirSync(path)
     let result = []
     for (const routeFile of routesFiles) {
@@ -48,9 +50,17 @@ async function checkDirAndImport(path) {
                         // don't know why i save em
                         const valueInstance = new value()
                         if (valueInstance instanceof template.Route) {
-                            let extraDetails = {
-                                route: "/api/" + valueInstance.path,
-                                content: {}
+                            let extraDetails
+                            if (valueInstance.path[0] == "/") {
+                                extraDetails = {
+                                    route: "/api" + valueInstance.path,
+                                    content: {}
+                                }
+                            } else {
+                                extraDetails = {
+                                    route: "/api/" + valueInstance.path,
+                                    content: {}
+                                }
                             }
                             let routePath;
                             let orgPath;
@@ -81,22 +91,102 @@ async function checkDirAndImport(path) {
                                 // extraDetails["content"]["COOKIE_FAILURE_CALLBACK"] = valueInstance["COOKIE_FAILURE_CALLBACK"]
                                 extraRouteDetails[extraDetails.route] = extraDetails["content"]
                             }
-                        } else if (valueInstance instanceof template.UtilitiesFunction) {
-                            valueInstance.startup()
-                            result.push(valueInstance);
                         }
                     }
                 }
             }
         }
         if (!isFile) {
-            const output = await checkDirAndImport(path + routeFile + "/")
+            const output = await checkDirAndImportRoutes(path + routeFile + "/")
             result = result.concat(output);
         }
     }
     return result;
 }
 
+function getProp(prop, obj) {
+    if (typeof obj !== 'object') throw 'getProp: obj is not an object'
+    if (typeof prop !== 'string') throw 'getProp: prop is not a string'
+
+    // Replace [] notation with dot notation
+    prop = prop.replace(/\[["'`](.*)["'`]\]/g,".$1")
+
+    return prop.split('.').reduce(function(prev, curr) {
+        return prev ? prev[curr] : undefined
+    }, obj || self)
+} 
+
+// function recursiveObjSearch(obj) {
+    
+// }  
+
+// function setNestedValue(path, obj, toSet) {
+//     const keys = path.split('.');
+//     let current = obj;
+//     let pastCurrent = current;
+//     for (let key of keys) {
+//         pastCurrent = current;
+//         current = current[key];
+//     }
+//     if (current != toSet) {
+//         current = toSet;
+//         return;
+//     }
+
+// }
+
+async function checkDirAndImportUtillities(path) {
+    const routesFiles = await fs.readdirSync(path)
+    for (const routeFile of routesFiles) {
+        // make sure is javascript file
+        const isFile = !fs.lstatSync(path + routeFile).isDirectory()
+        if (isFile && routeFile.includes(".js") && !routeFile.includes(".json")) {
+            // get only the file name and import it
+            const newInclude = require(path + routeFile.split(".")[0])
+            // so that files like template.js get skipped
+            // this value can be defined however u want
+            if (newInclude["IGNORE_FILE"] == undefined) {
+                // different functions add details here then after this is done it appends it to extraRouteDetails
+                // so that the middleware can check which paths should ignore the auth token
+                // the fuck did i write here?
+                for (const value of Object.values(newInclude)) {
+                    // make sure this is a route and nuthin else
+                    if (isClass(value)) {
+                        // don't know why i save em
+                        const valueInstance = new value()
+                        // maybe am down syndrum
+                        if (valueInstance instanceof template.Utillity) {
+                            // really running out of names😭
+                            // old ahh comment fr(only there cuz i copy paste code)
+                            valueInstance.startup();
+                            let utillityFullPath = routeFile.split(".")[0] + "." + valueInstance.path
+                            let pathToList = utillityFullPath.split(".")
+                            let currentObj = ""
+                            // what the fuck is happening here????
+                            // scooby doo ass code(a big fucking mistery)
+                            for (let i = 0; i < pathToList.length; i++){
+                                if (_.get(utillities, currentObj + pathToList[i]) == undefined) {
+                                    if (i == pathToList.length - 1) { 
+                                        _.set(utillities, currentObj + pathToList[i], valueInstance)
+                                    } else {
+                                        _.set(utillities, currentObj + pathToList[i], {})
+                                    
+                                    }
+                                    currentObj += pathToList[i] + "."
+                                }
+                            }
+                            
+                        }
+                    }
+                }
+            }
+        }
+        if (!isFile) {
+            await checkDirAndImportUtillities(path + routeFile + "/")
+        }
+    }
+}
+var showRoutesOnScreen = true;
 async function readConfigs(configJson) {
 
     const serverPort = configJson["serverSettings"]["port"]
@@ -123,17 +213,21 @@ async function readConfigs(configJson) {
         logger.announce("Started server!");
         logger.announce("Mapping routes...")
         // // map routes
-        // const routes = await checkDirAndImport("./routes/");
+        // const routes = await checkDirAndImportRoutes("./routes/");
         // console.log(routes);
         // i would document this but i forgor how i did this😭
+        console.log(await checkDirAndImportRoutes("./routes/"))
+        await checkDirAndImportUtillities("./utilities/")
         logger.announce("Mapped routes!")
         logger.announce(" --Master server has started-- ")
     } else {
         // Workers can share any TCP connection
         // In this case it is an HTTP server
-        var server = app.listen(serverPort, function () {
+        app.listen(serverPort, async function () {
             logger.announce("New server instance started with pid: " + process.pid)
-            checkDirAndImport("./routes/");
+            await checkDirAndImportRoutes("./routes/")
+            await checkDirAndImportUtillities("./utilities/")
+            customMiddleware.startup(configJson, utillities)
         })
     }
 
