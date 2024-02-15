@@ -23,6 +23,11 @@ module.exports = {
                         // userDB.dbObject.set(user, { password: password, permissions: [] });
                         //    here we return the new token
                         // return req.configs["serverSettings"]["auth"]["accessToken"];
+                        logger.user(user + " created an account", req, {
+                            user: user,
+                            tokenLifetime: req.configs.serverSettings.auth.tokenLifetime,
+                            defaultPermissions: req.configs.serverSettings.auth.defaultAccountPermissions
+                        })
                         res.send(userDB.createUser(user, password, req.configs.serverSettings.auth.tokenLifetime, req.configs.serverSettings.auth.defaultAccountPermissions));
                     } else {
                         res.status(400);
@@ -60,7 +65,13 @@ module.exports = {
                         //    here we return the new token
                         // return req.configs["serverSettings"]["auth"]["accessToken"];
                         if (userDB.checkPassword(user, password)) {
-                            res.send(userDB.regenToken(user, req.configs.serverSettings.auth.tokenLifetime));
+                            let token = userDB.regenToken(user, req.configs.serverSettings.auth.tokenLifetime);
+                            logger.user(user + " logged in", undefined, {
+                                user: user,
+                                token: token,
+                                tokenLifetime: req.configs.serverSettings.auth.tokenLifetime,
+                            })
+                            res.send(token);
                         } else {
                             res.status(400);
                             res.send(template.reasons.user.invalidUsernameOrPassword);

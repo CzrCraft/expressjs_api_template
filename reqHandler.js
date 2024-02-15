@@ -35,7 +35,7 @@ module.exports = {
             "info": "",
         };
         if (dont_log == undefined) {
-            logger.announce("New request was made with ID: " + reqID)
+            logger.request("New request was made with ID: " + reqID)
         }
         logger.logProccess(reqID, reqArray[reqID]);
         return reqID;
@@ -78,10 +78,10 @@ module.exports = {
             delete reqArray[reqID];
             logger.deleteReqcess(reqID);
             if (dont_log == undefined) {
-                logger.announce("Deleted a proccess with Proccess ID: " + reqID)
+                logger.request("Deleted a proccess with Proccess ID: " + reqID)
             }
         } else {
-            logger.announceError("Incorrect parameters passed to deleteReq")
+            logger.request("Incorrect parameters passed to deleteReq")
             throw "Incorrect parameters passed to deleteReq";
         }
     },

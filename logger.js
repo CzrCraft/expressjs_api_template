@@ -1,24 +1,138 @@
 const winston = require("winston");
 const discord = require("./discord");
+var _ = require('lodash');
 const fs = require('fs');
 module.exports = {
-    announce: async function (message, req) {
+    announceHTTP: async function (message, req, meta) {
         if (req != null) {
-            logger.info("-" + req.ip + "- " + message);
+            backLogger.log("http", "-" + req.ip + "- " + message, _.merge({
+                meta: {
+                    caller_ip: req.ip,
+                    user: req.user,
+                    token: req.token,
+                    req_id: req.reqID,
+                }
+            },meta)
+            );
             await discord.sendInfo("-" + req.ip + "- " + message)
         } else {
-            logger.info(message);
+            backLogger.log("http",message, meta);
             await discord.sendInfo(message)
         }
     },
-    announceDynamic: async function (whatToDo, message, req) {
-        if (whatToDo) {
-            await this.announce(message, req)
+    user: async function (message, req, meta) {
+        if (req != null) {
+            backLogger.log("user", "-" + req.ip + "- " + message, _.merge({
+                meta: {
+                    caller_ip: req.ip,
+                    user: req.user,
+                    token: req.token,
+                    req_id: req.reqID,
+                }
+            },meta)
+            );
+            await discord.sendInfo("-" + req.ip + "- " + message)
         } else {
-            await this.announceError(message, req)
+            backLogger.log("user",message, meta);
+            await discord.sendInfo(message)
         }
     },
-    announceError: async function (message, req) {
+    output: async function (message, req, meta) {
+        if (req != null) {
+            backLogger.log("output", "-" + req.ip + "- " + message, _.merge({
+                meta: {
+                    caller_ip: req.ip,
+                    user: req.user,
+                    token: req.token,
+                    req_id: req.reqID,
+                }
+            },meta)
+            );
+            await discord.sendInfo("-" + req.ip + "- " + message)
+        } else {
+            backLogger.log("output",message, meta);
+            await discord.sendInfo(message)
+        }
+    },
+    warn: async function (message, req, meta) {
+        if (req != null) {
+           // backLogger.log({ level: "warn", message: "-" + req.ip + "- " + message });
+            backLogger.log("warn", "-" + req.ip + "- " + message, Object.assign({}, {
+                caller_ip: req.ip,
+                user: req.user,
+                token: req.token,
+                req_id: req.reqID
+            }, meta)  );
+            await discord.sendInfo("-" + req.ip + "- " + message)
+        } else {
+            //backLogger.log({ level: "warn", message: message });
+            backLogger.log("warn",message, meta);
+            await discord.sendInfo(message)
+        }
+    },
+    // profile: async function (profile) {
+    //     if (profile != null && profile != undefined) {
+    //         backLogger.profile(profile);
+    //     } else {
+    //         console.log("sugi putulica :)")
+    //     }
+    // },
+    major_event: async function (message, req, meta) {
+        if (req != null) {
+            //backLogger.log({ level: "major_event", message: "-" + req.ip + "- " + message });
+            backLogger.log("major_event", "-" + req.ip + "- " + message, Object.assign({}, {
+                caller_ip: req.ip,
+                user: req.user,
+                token: req.token,
+                req_id: req.reqID
+            }, meta)  );
+            await discord.sendInfo("-" + req.ip + "- " + message)
+        } else {
+            backLogger.log("major_event",message, meta);
+            //backLogger.log({ level: "major_event", message: message });
+            await discord.sendInfo(message)
+        }
+    },
+    request: async function (message, req, meta) {
+        if (req != null) {
+            //backLogger.log({ level: "request", message: "-" + req.ip + "- " + message });
+            backLogger.log("request", "-" + req.ip + "- " + message, Object.assign({}, {
+                caller_ip: req.ip,
+                user: req.user,
+                token: req.token,
+                req_id: req.reqID
+            }, meta)  );
+            await discord.sendInfo("-" + req.ip + "- " + message)
+        } else {
+            backLogger.log("request", message, meta);
+            //backLogger.log({ level: "request", message: message });
+            await discord.sendInfo(message)
+        }
+    },
+    announce: async function (message, req, meta) {
+        if (req != null) {
+            //backLogger.log({ level: "info", message: "-" + req.ip + "- " + message, meta });
+            backLogger.log("info", "-" + req.ip + "- " + message, Object.assign({}, {
+                caller_ip: req.ip,
+                user: req.user,
+                token: req.token,
+                req_id: req.reqID
+            }, meta)  );
+            await discord.sendInfo("-" + req.ip + "- " + message)
+        } else {
+            //backLogger.log({ level: "info", message: message });
+            backLogger.log("info",message, meta);
+            await discord.sendInfo(message)
+        }
+    },
+    announceDynamic: async function (whatToDo, message, req, meta) {
+        if (whatToDo) {
+            await this.announce(message, req, meta)
+        } else {
+            await this.announceError(message, req, meta)
+        }
+    },
+    announceError: async function (message, req, meta) {
         if (req != null) {
             // Use Error object to capture the call stack
             const callerStack = new Error().stack;
@@ -26,8 +140,10 @@ module.exports = {
             const stackLines = callerStack.split('\n');
             // The second line usually contains the caller information
             const callerLine = stackLines[2].trim();
-            logger.error("-" + req.ip + "- " + message);
-            logger.error(callerLine)
+            // backLogger.log({ level: "error", message: "-" + req.ip + "- " + message });
+            // backLogger.log({ level: "error", message: callerLine })
+            backLogger.log("error", "-" + req.ip + "- " + message, meta);
+            backLogger.log("error", callerLine, meta);
             await discord.sendError("-" + req.ip + "- " + message)
             await discord.sendError(callerLine)
             // now update req status to error
@@ -40,7 +156,8 @@ module.exports = {
                 "user": req.user
             });
         } else {
-            logger.error(message);
+            backLogger.log("error",message, meta);
+            //backLogger.log({ level: "error", message: message });
             await discord.sendError(message)
         }
     },
@@ -75,7 +192,7 @@ module.exports = {
 function deleteFile(name) {
     fs.unlink(name, (err) => {
         if (err) {
-            logger.error(err);
+            backLogger.log({ level: "error", message: err });
             discord.sendError(err)
         }
     });
@@ -104,19 +221,57 @@ function getLogDirFromEpoch(epochDate) {
 }
 
 const logFormat = winston.format.printf(({ level, message, timestamp }) => {
-    const customTimestamp = new Date().toLocaleString(); // Get local time
-    return `${formatLocalTime()} [${level.toUpperCase()}]: ${message}`;
+    return `${formatLocalTime()} [${level}]: ${message}`;
 });
 let date_ob = new Date();
-const logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.combine(winston.format.timestamp(), logFormat,),
+const levelsAndColors = {
+    levels: {
+        error: 0,
+        warn: 1,
+        info: 2,
+        user: 3,
+        major_event: 4,
+        http: 5,
+        request: 6,
+        output: 7,
+        all: 8,
+    },
+    colors: {
+        error: "bold red",
+        warn: "bold yellow",
+        info: "bold white",
+        user: "bold magenta",
+        major_event: "bold blue",
+        http: "bold green",
+        request: "bold cyan",
+        output: "bold white"
+    }
+}
+winston.addColors(levelsAndColors.colors)
+const backLogger = winston.createLogger({
+    levels: levelsAndColors.levels,
+    format: winston.format.combine( 
+        winston.format.timestamp(),
+        logFormat,
+    ),
     exitOnError: false,
     timestamp: true,
     localTime: true,
     transports: [
-        new winston.transports.Console(),
-        new winston.transports.File({ filename: getLogDir() + 'error.log', level: 'error' }),
-        new winston.transports.File({ filename: getLogDir() + 'combined.log' }),
+        new winston.transports.Console({
+            level: "http",
+            format: winston.format.combine(
+                winston.format.colorize({level: true, message: false},), 
+                winston.format.timestamp(),
+                logFormat,
+            ),
+        }),
+        new winston.transports.File({ filename: getLogDir() + 'error.log', level: 'error', }),
+        new winston.transports.File({ filename: getLogDir() + 'clean.log', level: "http" }),
+        new winston.transports.File({ filename: getLogDir() + 'all.log', level: "all" }),
+
+        new winston.transports.File({ filename: getLogDir() + 'error.json', level: 'error', format: winston.format.json()}),
+        new winston.transports.File({ filename: getLogDir() + 'clean.json', level: "http" , format: winston.format.json()}),
+        new winston.transports.File({ filename: getLogDir() + 'all.json', level: "output", format: winston.format.json() }),
     ],
 });

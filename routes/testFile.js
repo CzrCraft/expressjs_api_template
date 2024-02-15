@@ -22,8 +22,8 @@ async function recursiveUtillitySearch(obj, currentPath, count, req) {
                 additionalInfo = err;
             }
             // bag pula in ele da count ca e o bataie de cap
-            // logger.announce((passed ? "PASS " : "ERROR") + "  " + "(" + (count + 1) + "/" + totCount + ")  :  " + currentPath)
-            await logger.announceDynamic(passed, (passed ? "PASS " : "ERROR") + "  :  " + currentPath + (passed ? "" : "  --> check " + req.reqID + ".json"))
+            // logger.output((passed ? "PASS " : "ERROR") + "  " + "(" + (count + 1) + "/" + totCount + ")  :  " + currentPath)
+            await logger.output((passed ? "PASS " : "ERROR") + "  :  " + currentPath + (passed ? "" : "  --> check " + req.reqID + ".json"))
             await req.handler.updateReqStatus(req.reqID, "testing utillities", [
                 currentPath,
                 (passed ? "PASS" : "ERROR"),
@@ -58,13 +58,14 @@ async function recursiveUtillitySearch(obj, currentPath, count, req) {
 module.exports = {
     caca: class extends template.Route{
         constructor() {
-            const route = "caca"
+            const route = "test"
             super(route, undefined, {RESTRICTED: true});
         }
         async GET(req, res) {
             try {
-                res.send("CACA!!! >:3")
-                logger.announce("--testing utillities--")
+                res.send(req.reqID)
+                logger.warn("user -" + req.user + "- requested an API test")
+                logger.output("--testing utillities--", undefined, {test: "testMeta"})
                 let utilyes = req.utillities
                 // totCount = 0
                 // for (let i = 0; i < Object.keys(utilyes).length; i++) {
@@ -79,6 +80,7 @@ module.exports = {
                         await recursiveUtillitySearch(utily, Object.keys(utilyes)[i], 0, req)
                     }
                 }
+                logger.output("--end--")
             } catch (err) {
                 logger.announceError(err, req)
                 res.sendStatus(500);

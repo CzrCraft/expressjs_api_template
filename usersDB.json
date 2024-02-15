@@ -2,8 +2,15 @@
     "caca": {
         "password": "caca",
         "permissions": [
-            "/api/caca"
+            "/api/test"
         ],
-        "token": "1707761516299-k72eO0hSRtmcEiX1tnoT0JYeyuhJpUC5lvwQY8iGe5XxyIWDGl-1707764108299"
+        "token": "1707994969038-0knwKIorVJtXJKYChz3UJdxEH1d7lR0EOemnFhn6yw3dMA1qeX-1707997561038"
+    },
+    "caca2": {
+        "password": "caca2",
+        "permissions": [
+            "/api/test"
+        ],
+        "token": "1707995594529-0vAQs1LDL34T4TBWNp0LN7Zpbb1x79usCAkejFRoDxyTplNMcn-1707998186529"
     }
 }

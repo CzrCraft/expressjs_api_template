@@ -28,7 +28,7 @@ module.exports = {
             super(path);
         }
         async test() {
-            logger.announceError("I'm gonna throw an error now(feeling mischievous)")
+            logger.output("I'm gonna throw an error now(feeling mischievous)")
             throw "<3 deftones"
         }
     },
@@ -38,7 +38,7 @@ module.exports = {
             super(path);
         }
         async test() {
-            logger.announceError("I'm a copycat of errorThrower :3")
+            logger.output("I'm a copycat of errorThrower :3")
             throw "<3 deftones"
         }
     },

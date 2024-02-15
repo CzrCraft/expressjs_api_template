@@ -208,37 +208,37 @@ async function readConfigs(configJson) {
         configJSON: configJson,
     }
     if (cluster.isPrimary) {
-        logger.announce("--API IS STARTING--")
-        logger.announce("Starting server...")
+        logger.major_event("--API IS STARTING--")
+        logger.major_event("Starting server...")
         const numCPUs = availableParallelism();
-        logger.announce(`Primary ${process.pid} is running`);
-        logger.announce(numCPUs + " avaialable cpu's");
-        logger.announce("Default behaviour; using all the cpu's");
+        logger.major_event(`Primary ${process.pid} is running`);
+        logger.major_event(numCPUs + " avaialable cpu's");
+        logger.major_event("Default behaviour; using all the cpu's");
         // Fork workers.
         for (let i = 0; i < numCPUs; i++) {
             cluster.fork();
         }
 
         cluster.on('exit', (worker, code, signal) => {
-            logger.announce(`Server ${worker.process.pid} died`);
+            logger.warn(`Server ${worker.process.pid} died`);
             // startup new instance
             cluster.fork();
         });
-        logger.announce("Started server!");
-        logger.announce("Mapping routes...")
+        logger.major_event("Started server!");
+        logger.major_event("Mapping routes...")
         // // map routes
         // const routes = await checkDirAndImportRoutes("./routes/");
         // console.log(routes);
         // i would document this but i forgor how i did this😭
         console.log(await checkDirAndImportRoutes("./routes/"))
         await checkDirAndImportUtillities("./utilities/")
-        logger.announce("Mapped routes!")
-        logger.announce(" --Master server has started-- ")
+        logger.major_event("Mapped routes!")
+        logger.major_event(" --Master server has started-- ")
     } else {
         // Workers can share any TCP connection
         // In this case it is an HTTP server
         app.listen(serverPort, async function () {
-            logger.announce("New server instance started with pid: " + process.pid)
+            logger.major_event("New server instance started with pid: " + process.pid)
             await checkDirAndImportRoutes("./routes/")
             await checkDirAndImportUtillities("./utilities/")
             customMiddleware.startup(configJson, utillities)
