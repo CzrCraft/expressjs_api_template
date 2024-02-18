@@ -21,9 +21,9 @@ function makeid(length) { // we <3 stackoverflow
 function generateNewToken(validFor) {
     const tokenRandomLength = 50;// randomTokenLength is 50 chars(a bit overboard but eh)
     let seconds = Date.now();
-    let token = seconds + "-" + makeid(tokenRandomLength) + "-" + (seconds + (cleanInt(validFor) * 24 * 60 * 60));
+    let token = seconds + "-" + makeid(tokenRandomLength) + "-" + (seconds + (cleanInt(validFor) * 24 * 60 * 60 * 1000));
     while (getUserFromToken(token)) {
-        token = seconds + "-" + makeid(tokenRandomLength) + "-" + (seconds + (cleanInt(validFor) * 24 * 60 * 60));
+        token = seconds + "-" + makeid(tokenRandomLength) + "-" + (seconds + (cleanInt(validFor) * 24 * 60 * 60 * 1000));
     }
     return token;
 }
