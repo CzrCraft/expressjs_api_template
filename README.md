@@ -1,19 +1,14 @@
 
 # TODO:
 
--- change manager so it uses the user system
-
--- add a way for people to use the user system and local database easily
+-- c++ vers coming soon
 
 -- fix manager cuz currently it's broken / redo it
 
 -- documentation for the command system in the manager
 
--- documentation for proccess system
-
--- documentation for utillity system
-
 -- fix https://github.com/CzrCraft/expressJS_api_template/issues/1
+
 # ONLY FILES INSIDE THE ROUTES DIRECTORY WILL BE RUN
 
 # expressJS_api_template
